@@ -12,6 +12,7 @@
 struct TokenizerT_ {
   int numTok;
   char** toks;
+  int iterator;
 };
 
 typedef struct TokenizerT_ TokenizerT;
@@ -34,6 +35,8 @@ TokenizerT *TKCreate(char *separators, char *ts) {
 
   TokenizerT* tok = (TokenizerT *)malloc(sizeof(TokenizerT));
   tok->numTok = 0;
+  tok->iterator = 0;
+
   int lenOfDelims = strlen(separators);
   int cmdStrLen = strlen(ts);
   char delim = separators[0];
@@ -98,8 +101,7 @@ void TKDestroy(TokenizerT *tk) {
  */
 
 char *TKGetNextToken(TokenizerT *tk) {
-  
-  return NULL;
+  return tk->toks[tk->iterator];
 }
 
 /*
@@ -125,7 +127,7 @@ int main(int argc, char **argv) {
   char* nextTok;
   
   tok = TKCreate(argv[1], argv[2]);
-
-  TKDestroy(tok);
+  printf("%s\n", TKGetNextToken(tok));
+  //TKDestroy(tok);
   return 0;
 }
