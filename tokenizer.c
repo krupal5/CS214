@@ -34,6 +34,9 @@ typedef struct TokenizerT_ TokenizerT;
 TokenizerT *TKCreate(char *separators, char *ts) {
 
   TokenizerT* tok = (TokenizerT *)malloc(sizeof(TokenizerT));
+  int lenOfts = strlen(ts);
+  char *tsDuplic = (char *)calloc(lenOfts, sizeof(char));
+  strcpy(tsDuplic, ts);
   tok->numTok = 0;
   tok->iterator = 0;
 
@@ -46,7 +49,7 @@ TokenizerT *TKCreate(char *separators, char *ts) {
   int sizeHolder = 0;
 
   while(i < cmdStrLen){
-    if (ts[i] == delim){
+    if (tsDuplic[i] == delim){
       tok->numTok++;
     }
     i++;
@@ -55,19 +58,29 @@ TokenizerT *TKCreate(char *separators, char *ts) {
   tok->numTok++;
   tok->toks = (char**) malloc(tok->numTok * sizeof(char*));
 
-  i=0;
-  while(i < cmdStrLen){
-    if (ts[i] == delim){
+  for(i=0; i < cmdStrLen; i++){
+    if (tsDuplic[i] == delim){
       tok->toks[j] = (char*) malloc(sizeHolder * sizeof(char));
       j++;
       sizeHolder = 0;
     }
-    i++;
-    sizeHolder++;
+    else
+        sizeHolder++;
   }
-
-  printf("%d\n", tok->numTok);
-  return NULL;
+    
+  j=0;
+  sizeHolder = 0;
+  
+  for(i=0; i < cmdStrLen; i++){
+    if (tsDuplic[i] == delim){
+        strncpy(tok->toks[j], tsDuplic+(i-sizeHolder), sizeHolder);
+        j++;
+        sizeHolder=0;
+    }
+    else sizeHolder++;
+  }
+  free(tsDuplic);
+  return tok;
 }
 
 /*
@@ -128,6 +141,6 @@ int main(int argc, char **argv) {
   
   tok = TKCreate(argv[1], argv[2]);
   printf("%s\n", TKGetNextToken(tok));
-  //TKDestroy(tok);
+  TKDestroy(tok);
   return 0;
 }
