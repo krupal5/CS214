@@ -39,46 +39,42 @@ TokenizerT *TKCreate(char *separators, char *ts) {
   strcpy(tsDuplic, ts);
   tok->numTok = 0;
   tok->iterator = 0;
-
-  int lenOfDelims = strlen(separators);
   int cmdStrLen = strlen(ts);
   char delim = separators[0];
-  char* tempStringhold;
   int i = 0; 
   int j = 0;
   int sizeHolder = 0;
 
   while(i < cmdStrLen){
-    if (tsDuplic[i] == delim){
+    if (tsDuplic[i] == delim && sizeHolder >0){
       tok->numTok++;
+      sizeHolder = 0;
+    }
+    else if(tsDuplic[i] != delim){
+       sizeHolder++; 
     }
     i++;
   }
-
+  
+  sizeHolder = 0;
   tok->numTok++;
-  tok->toks = (char**) malloc(tok->numTok * sizeof(char*));
+  tok->toks = (char**) malloc((tok->numTok+1) * sizeof(char*));
 
   for(i=0; i < cmdStrLen; i++){
-    if (tsDuplic[i] == delim){
-      tok->toks[j] = (char*) malloc(sizeHolder * sizeof(char));
+    if (tsDuplic[i] == delim && sizeHolder >0){
+      tok->toks[j] = (char*) malloc((sizeHolder+1) * sizeof(char));
+      strncpy(tok->toks[j], tsDuplic+(i-sizeHolder), sizeHolder);
+        tok->toks[j][sizeHolder] = '\0';
       j++;
       sizeHolder = 0;
     }
-    else
-        sizeHolder++;
-  }
-    
-  j=0;
-  sizeHolder = 0;
-  
-  for(i=0; i < cmdStrLen; i++){
-    if (tsDuplic[i] == delim){
-        strncpy(tok->toks[j], tsDuplic+(i-sizeHolder), sizeHolder);
-        j++;
-        sizeHolder=0;
+    else if(tsDuplic[i] != delim){
+       sizeHolder++; 
     }
-    else sizeHolder++;
   }
+  
+  tok->toks[j] = (char*) malloc((sizeHolder+1) * sizeof(char));  
+  strncpy(tok->toks[j], tsDuplic+(i-sizeHolder), sizeHolder);
   free(tsDuplic);
   return tok;
 }
@@ -114,7 +110,8 @@ void TKDestroy(TokenizerT *tk) {
  */
 
 char *TKGetNextToken(TokenizerT *tk) {
-  return tk->toks[tk->iterator];
+  if (tk->iterator > tk->numTok) return NULL; 
+  else {tk->iterator++; return tk->toks[tk->iterator-1];}
 }
 
 /*
@@ -135,12 +132,19 @@ int main(int argc, char **argv) {
     printf("Usage: ./tokenizer <delimeters> <tokens>\n");
     return 1;
   }
-
+    
   TokenizerT* tok;
-  char* nextTok;
-  
+  char* retToken;
+
   tok = TKCreate(argv[1], argv[2]);
-  printf("%s\n", TKGetNextToken(tok));
+  retToken = TKGetNextToken(tok);
+
+  while (retToken != NULL){
+      printf("%s\n", retToken);
+      retToken = TKGetNextToken(tok);
+  }
+
   TKDestroy(tok);
+  
   return 0;
 }
