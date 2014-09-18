@@ -30,6 +30,18 @@ typedef struct TokenizerT_ TokenizerT;
  *
  * You need to fill in this function as part of your implementation.
  */
+ int mltdelim (char * separators){
+   int count =0;
+   char* cpy = (char *)malloc(sizeof(char));
+   int i;
+   char quote = '"';
+   strcpy(cpy,separators);
+   for (i =0; i < strlen(cpy); i++) {
+    if (cpy[i+1]!= quote) count++
+    else return count;
+   }
+   return count;
+ }
 
 TokenizerT *TKCreate(char *separators, char *ts) {
 
